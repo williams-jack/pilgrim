@@ -1,0 +1,20 @@
+
+services:
+
+  pg:
+    container_name: pg
+    image: postgres:18.1-alpine
+    restart: on-failure:5
+    environment:
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: testdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql
+
+volumes:
+  pgdata:
+
+

@@ -1,0 +1,12 @@
+{
+    "upDir": "migrations/up",
+    "downDir": "migrations/down",
+    "dbType": "postgres",
+    "dbConfig": {
+        "host": "localhost",
+        "port": 5432,
+        "dbName": "testdb",
+        "user": "testuser",
+        "password": "password"
+    }
+}
