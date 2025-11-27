@@ -1,8 +1,12 @@
 package postgres
 
 import (
+	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
+
+	"github.com/williams-jack/pilgrim/internal/shared"
 )
 
 // PgConfig holds the configuration details for connecting to a PostgreSQL database.
@@ -21,8 +25,17 @@ type PgConfig struct {
 	Params map[string]string `json:"params"`
 }
 
+type pgConfigRaw struct {
+	Host     string            `json:"host"`
+	Port     any               `json:"port"`
+	User     string            `json:"user"`
+	Password string            `json:"password"`
+	DbName   string            `json:"dbName"`
+	Params   map[string]string `json:"params"`
+}
+
 // ConnectionString constructs the PostgreSQL connection string from the PgConfig fields.
-func (pg PgConfig) ConnectionString() string {
+func (pg *PgConfig) ConnectionString() string {
 	var connStrBuilder strings.Builder
 	connStrBuilder.WriteString("postgres://")
 	if pg.User != "" {
@@ -49,4 +62,35 @@ func (pg PgConfig) ConnectionString() string {
 		connStrBuilder.WriteString("?" + strings.Join(params, "&"))
 	}
 	return connStrBuilder.String()
+}
+
+// UnmarshalJSON custom unmarshals the PgConfig from JSON, replacing environment variable
+// placeholders with their actual values.
+func (pg *PgConfig) UnmarshalJSON(data []byte) error {
+	var raw pgConfigRaw
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	pg.Host = shared.ReplaceEnvVariables(raw.Host)
+	pg.User = shared.ReplaceEnvVariables(raw.User)
+	pg.Password = shared.ReplaceEnvVariables(raw.Password)
+	pg.DbName = shared.ReplaceEnvVariables(raw.DbName)
+	pg.Params = make(map[string]string)
+	for key, value := range raw.Params {
+		pg.Params[key] = shared.ReplaceEnvVariables(value)
+	}
+	// Handle Port which can be int or string
+	switch v := raw.Port.(type) {
+	case float64:
+		pg.Port = int(v)
+	case string:
+		port, err := strconv.Atoi(shared.ReplaceEnvVariables(v))
+		if err != nil {
+			return fmt.Errorf("invalid port value: %v", err)
+		}
+		pg.Port = port
+	default:
+		return fmt.Errorf("invalid port type")
+	}
+	return nil
 }
