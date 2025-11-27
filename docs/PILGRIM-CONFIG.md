@@ -90,3 +90,22 @@ Example `params`:
 ## Usage
 
 It's recommended to save your configuration file as `pilgrim.config.json` in your project root. You can then use this configuration file with Pilgrim commands to manage your database migrations.
+
+## Using Environment Variables in Configuration
+
+Pilgrim supports the use of environment variables in your `pilgrim.config.json` file. You can reference environment variables in any string field by using the `${VAR_NAME}` syntax. At runtime, Pilgrim will automatically replace these placeholders with the corresponding environment variable values. If the environment variable is not set, Pilgrim will replace it with an empty string.
+
+**Example:**
+```json
+{
+  "dbType": "postgres",
+  "dbConfig": {
+    "host": "${PG_HOST}",
+    "port": "${PG_PORT}",
+    "user": "${PG_USER}",
+    "password": "${PG_PASSWORD}",
+    "dbName": "${PG_DBNAME}"
+  }
+}
+
+In this example, the values for `host`, `port`, `user`, `password`, and `dbName` will be taken from the respective environment variables when Pilgrim runs.
