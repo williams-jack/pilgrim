@@ -34,22 +34,22 @@ func ReadFromReader(reader io.Reader) (*PilgrimConfig, error) {
 	if err := decoder.Decode(&rawConfig); err != nil {
 		return nil, err
 	}
+	var dbConfig DbConfig
 	switch rawConfig.DbType {
 	case "postgres":
 		var pgConfig postgres.PgConfig
-		if err := json.Unmarshal(rawConfig.RawDbConfig, &pgConfig); err != nil {
-			return nil, err
-		}
-		return &PilgrimConfig{
-			DbType:           rawConfig.DbType,
-			DownDir:          rawConfig.DownDir,
-			UpDir:            rawConfig.UpDir,
-			connectionString: rawConfig.ConnectionString,
-			dbConfig:         pgConfig,
-		}, nil
+		pgConfig.UnmarshalJSON(rawConfig.RawDbConfig)
+		dbConfig = &pgConfig
 	default:
 		return nil, errors.New("unsupported dbType: " + string(rawConfig.DbType))
 	}
+	return &PilgrimConfig{
+		DbType:           rawConfig.DbType,
+		DownDir:          shared.ReplaceEnvVariables(rawConfig.DownDir),
+		UpDir:            shared.ReplaceEnvVariables(rawConfig.UpDir),
+		dbConfig:         dbConfig,
+		connectionString: shared.ReplaceEnvVariables(rawConfig.ConnectionString),
+	}, nil
 }
 
 // ConnectionString returns the database connection string.
