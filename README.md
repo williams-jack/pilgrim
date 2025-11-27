@@ -52,4 +52,6 @@ Feel free to open issues or submit pull requests on GitHub. Contributions are we
 ### Does Pilgrim automatically generate SQL when creating migration files?
 No, Pilgrim does not generate SQL automatically. Users are expected to write their own SQL in the migration files. Pilgrim focuses on managing and applying these migrations rather than generating them.
 
+### What platofrms does Pilgrim support?
+Pilgrim is currently only operational on AMD64 Linux systems. Support for additional platforms may be added in the future based on demand.
 
