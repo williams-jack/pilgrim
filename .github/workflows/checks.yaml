@@ -1,0 +1,45 @@
+# Executes tests and other checks on pull requests and pushes to branches or tags.
+name: Run Checks
+
+on:
+  push:
+    branches:
+      - "*"
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      # TODO: Better management of go version.
+      - name: Install Go Toolchain
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.24"
+
+      - name: Run Unit Tests
+        run: |
+          sh scripts/unit-tests.sh
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Install Go Toolchain
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.24"
+
+      - name: Run E2E Tests
+        working-directory: ./e2e
+        run: |
+          python3 tests.py
+
